@@ -43,7 +43,7 @@ app.use((err, req, res, next) => {
 //Connect to mongodb database
 (async () => {
   try {
-    await db.connect();
+    await db.connect;
     const PORT = process.env.PORT || 8080;
     const HOST_NAME = process.env.HOST_NAME || "localhost";
     app.listen(PORT, HOST_NAME,() => {
