@@ -1,21 +1,40 @@
 require("dotenv").config(require("./config/dotenv"));
 
 const express = require("express");
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
+const path = require("path");
 const apiResponse = require("./utils/apiResponse");
 const APIStatus = require("./constants/APIStatus");
 const db = require("./db/mongoose");
-//const cors = require("cors");
+const cors = require("cors");
 const route = require("./routes");
+const { port } = require("./config");
 const app = express();
 
-
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Smart Home",
+      version: "1.0.0",
+    },
+    servers: [
+      {
+        url: "http://localhost:4000",
+      },
+    ],
+  },
+  apis: ["./src/routes/*.js"], // files containing annotations as above
+};
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerJsDoc(options)));
 
 // Parse body req to json
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Enable cors
-//app.use(cors());
+app.use(cors());
 
 // Route middleware
 route(app);
@@ -41,14 +60,7 @@ app.use((err, req, res, next) => {
 });
 
 //Connect to mongodb database
-(async () => {
-  try {
-    await db.connect;
-    const PORT = process.env.PORT || 8080;
-    const HOST_NAME = process.env.HOST_NAME || "localhost";
-    app.listen(PORT, HOST_NAME,() => {
-      console.log(`Server is running on port ${PORT}.`);
-    });
-  } catch (error) {
-    console.log(">> Error to db: ",error)};
-})();
+db.connect();
+
+//Start an express server
+app.listen(port, () => console.log(`Server Started http://localhost:${port}`));

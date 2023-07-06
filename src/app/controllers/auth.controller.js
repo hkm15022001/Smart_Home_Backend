@@ -4,8 +4,10 @@ const apiResponse = require("../../utils/apiResponse");
 const APIStatus = require("../../constants/APIStatus");
 const genToken = require("../../utils/genToken");
 const hashPassword = require("../../utils/hashPassword");
-
-
+const { port } = require("../../config");
+const { globalCache } = require("../../db/globalCache");
+const { sendEmail } = require("../../utils/sendEmail");
+const { nanoid } = require("nanoid");
 
 const login = async (req, res, next) => {
   const { username, password } = req.body;
@@ -81,9 +83,72 @@ const register = async (req, res, next) => {
     .json(apiResponse({ status: APIStatus.SUCCESS, data: { token } }));
 };
 
+const forgetPasswordUser = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await getUserDb({ email });
+  if (!user)
+    return res.status(404).json(
+      apiResponse({
+        status: APIStatus.FAIL,
+        msg: "This account does not exist",
+      })
+    );
 
+  const verifyCode = nanoid();
+  const verifyLink = `http://localhost:${port}/auth/user/verify-code?email=${email}&code=${verifyCode}`;
+  globalCache.set(`user:${email}`, verifyCode, "1000");
+  await sendEmail(
+    email,
+    "Forget password on Smart Home",
+    "Click this link to verify",
+    verifyLink
+  );
+  return res.status(200).json(
+    apiResponse({
+      status: APIStatus.SUCCESS,
+      msg: "Check your email to get the verify link",
+    })
+  );
+};
+
+const verifyCodeUser = async (req, res, next) => {
+  const { email, code } = req.query;
+  const realCode = globalCache.get(`user:${email}`);
+  console.log(realCode);
+  if (realCode !== code)
+    return res
+      .status(400)
+      .json(apiResponse({ status: APIStatus.FAIL, msg: "Invalid code" }));
+
+  const newPassword = nanoid(8);
+  const [user, hashedPw] = await Promise.all([
+    getUserDb({ email }),
+    hashPassword(newPassword),
+  ]);
+
+  user.password = hashedPw;
+  await Promise.all([
+    user.save(),
+    sendEmail(
+      email,
+      "New password on Smart Home",
+      "This is your new password",
+      newPassword
+    ),
+  ]);
+  globalCache.del(`user:${email}`);
+
+  return res.status(200).json(
+    apiResponse({
+      status: APIStatus.SUCCESS,
+      msg: "Check your email to get your new password",
+    })
+  );
+};
 
 module.exports = {
   login,
-  register
+  register,
+  forgetPasswordUser,
+  verifyCodeUser,
 };
