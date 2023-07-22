@@ -19,6 +19,14 @@ const getDeviceDb = async (query) => {
   return device;
 };
 
+//Get device with filter
+const getFilterDevice = async (query) => {
+  const device = await Device.find(query);
+
+  return device;
+};
+
+
 // Create one device
 const createDeviceDb = async (query) => {
   const device = await new Device(query).save();
@@ -36,7 +44,6 @@ const deleteDeviceDb = async (query) => {
 // Edit device
 const editDeviceDb = async (query) => {
   const { status, _id } = query;
-
   const device = await Device.findById(_id);
   device.status = status;
   const rs = await device.save();
@@ -49,4 +56,5 @@ module.exports = {
   createDeviceDb,
   deleteDeviceDb,
   editDeviceDb,
+  getFilterDevice
 };

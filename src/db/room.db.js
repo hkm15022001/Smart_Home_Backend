@@ -15,7 +15,7 @@ const getAllRoomDb = async(query) => {
 
 // Get room (more)
 const getRoomDb = async(query) => {
-    const room = await Room.find(query);
+    const room = await Room.findOne(query);
 
     return room;
 };

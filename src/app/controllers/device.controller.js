@@ -46,7 +46,7 @@ const getDevice = async (req, res, next) => {
 // POST('/')
 const createDevice = async (req, res, next) => {
   const userId = req.user._id,
-    { deviceName, status, roomId } = req.body;
+    { deviceId, deviceName, status, roomId } = req.body;
   const device = await getDeviceDb({ deviceName, roomId });
   if (device)
     return res
@@ -55,7 +55,7 @@ const createDevice = async (req, res, next) => {
         apiResponse({ status: APIStatus.FAIL, msg: "Bạn đã có thiết bị này" })
       );
 
-  const rs = await createDeviceDb({ deviceName, status, roomId, userId });
+  const rs = await createDeviceDb({ deviceName, deviceId, status, roomId, userId });
 
   return res
     .status(201)
@@ -101,7 +101,6 @@ const editDevice = async (req, res, next) => {
     status,
   };
   if (rs) {
-    console.log(message);
     mqttClient.publish(smart_home_cd, JSON.stringify(message));
 
     getMeterPowerByDay(status, userId, device);
@@ -121,21 +120,23 @@ async function getMeterPowerByDay(status, userId, device) {
   const meter_power = await MeterPower.findOne({ userId }).sort({
     dateTime: -1,
   });
+
   // Nếu tắt thì cộng điện tiêu thụ
   if (status == "off") {
     // nếu bảng meter-Power đã có document của ngày hôm nay
-    if (dateNow == moment(meter_power.dateTime).format("YYYY-MM-DD")) {
+    if (dateNow === moment(meter_power.dateTime).format("YYYY-MM-DD")) {
       // thực hiện tăng điện tăng
       let d = new Date();
       let milliseconds = d.getTime() - device.startTime.getTime();
-      let hours = milliseconds / 1000;
+      let hours = milliseconds / 1000 / 3600;
       let numPower = Math.round(device.wattage * hours);
       meter_power.activePower += numPower;
       await meter_power.save();
     }
   } else if (status == "on") {
     // Nếu bật thì đặt startTime
-    if (dateNow != moment(meter_power.dateTime).format("YYYY-MM-DD")) {
+
+    if ((!meter_power) || (dateNow !== moment(meter_power.dateTime).format("YYYY-MM-DD"))) {
       await new MeterPower({ userId }).save();
     }
     device.startTime = moment();

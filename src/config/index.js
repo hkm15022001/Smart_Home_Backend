@@ -1,33 +1,45 @@
-const port = process.env.PORT || 4000;
-const jwtKey = process.env.JWT_KEY || 'secret_key_jwt';
-const database_url = process.env.DATABASE_URL || 'mongodb://localhost:27017/smart_home';
+require('dotenv').config();
 
-// const emailHost = process.env.EMAIL_HOST
-// const emailPort = process.env.EMAIL_PORT
 const emailUser = process.env.EMAIL_USER || 'user_name_for_email';
 const emailPassword = process.env.EMAIL_PASSWORD || 'password_for_email';
-
-// const userConfig = {
-//   genders: {
-//     MALE: 'Male',
-//     FEMALE: 'Female',
-//     OTHER: 'Other'
-//   }
-// }
 
 const emailConfig = {
   emailUser,
   emailPassword,
 }
-
-module.exports = {
-  //   pagination: {
-  //     page: 1,
-  //     records: 10
-  //   },
-  // userConfig,
-  emailConfig,
-  port,
-  database_url,
-  jwtKey,
+const devConfig = {
+  app: {
+    port:process.env.DEV_PORT || 4000,
+    hostname: process.env.DEV_HOST_NAME || "localhost",
+  },
+  db: {
+    port : process.env.DEV_DB_PORT || 27018,
+    hostname: process.env.DEV_DB_HOST_NAME || "localhost",
+    username: process.env.DEV_DB_USER_NAME || "root",
+    password: process.env.DEV_DB_PASSWORD || "123456",
+    name: process.env.DEV_DB_NAME || "smarthome22"
+  }
 };
+
+const proConfig = {
+  app: {
+    port :process.env.PRO_PORT || 4000,
+    hostname: process.env.PRO_HOST_NAME,
+
+  },
+  db: {
+    port : process.env.PRO_DB_PORT || 27018,
+    hostname: process.env.PRO_DB_HOST_NAME || "localhost",
+    username: process.env.PRO_DB_USER_NAME || "root",
+    password: process.env.PRO_DB_PASSWORD || "123456",
+    name: process.env.PRO_DB_NAME || "smarthome"
+  }
+};
+
+const config = {
+  dev: devConfig,
+  pro: proConfig
+}
+const env = process.env.NODE_ENV ||"dev";
+
+module.exports = config[env];

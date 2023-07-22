@@ -1,5 +1,5 @@
 require("dotenv").config(require("./config/dotenv"));
-
+const bodyParser = require('body-parser');
 const express = require("express");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -9,7 +9,7 @@ const APIStatus = require("./constants/APIStatus");
 const db = require("./db/mongoose");
 const cors = require("cors");
 const route = require("./routes");
-const { port } = require("./config");
+const { app:{port} } = require("./config");
 const app = express();
 
 const options = {
@@ -21,7 +21,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:4000",
+        url: "http://localhost:8081",
       },
     ],
   },
@@ -30,8 +30,8 @@ const options = {
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerJsDoc(options)));
 
 // Parse body req to json
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Enable cors
 app.use(cors());
@@ -42,6 +42,7 @@ route(app);
 // Handle exception
 app.use((err, req, res, next) => {
   if (err) {
+    console.log(err);
     return res.status(err.statusCode || 500).json(
       apiResponse({
         status: APIStatus.FAIL,

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { jwtKey } = require("../config");
+const jwtKey = "secret_example"
 const APIStatus = require("../../src/constants/APIStatus");
 const { getUserDb } = require("../db/user.db");
 const apiResponse = require("../utils/apiResponse");

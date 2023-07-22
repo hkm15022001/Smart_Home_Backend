@@ -6,7 +6,7 @@ const deviceRouter = require("./device.route");
 const subscriberRouter = require("./subscriber.route");
 const sensorRouter = require("./sensor.route");
 const meterPowerRouter = require("./meterPower.route");
-
+const speechRouter = require("./speech.route");
 //Index of route middleware
 const route = (app) => {
   // Route middleware auth
@@ -32,6 +32,9 @@ const route = (app) => {
 
   // Route meter_power
   app.use("/api/v1/meter-powers", meterPowerRouter);
+
+  //Route Speech
+  app.use("/speech",speechRouter)
 };
 
 module.exports = route;

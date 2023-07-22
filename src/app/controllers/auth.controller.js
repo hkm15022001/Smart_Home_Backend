@@ -50,6 +50,7 @@ const login = async (req, res, next) => {
 
 const register = async (req, res, next) => {
   const { email, username, password, fullName } = req.body;
+  
   const [user1, user2] = await Promise.all([
     getUserDb({ email }),
     getUserDb({ username }),
@@ -76,7 +77,6 @@ const register = async (req, res, next) => {
       .json(
         apiResponse({ status: APIStatus.ERROR, msg: "can not create new user" })
       );
-
   const token = genToken(user);
   return res
     .status(200)

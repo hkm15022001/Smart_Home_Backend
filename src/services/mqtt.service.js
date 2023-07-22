@@ -5,7 +5,7 @@ const { insertDataSensorDb } = require("../db/sensor.db");
 
 const host_mqtt = "broker.hivemq.com";
 const port_mqtt = "1883";
-const clientId = `8a673344-cc1c-4bfc-9f68-bab47bbbf845`;
+const clientId = `43e9e996-5823-4b43-bf06-aace43c3da0a`;
 const connectUrl = `mqtt://${host_mqtt}:${port_mqtt}`;
 
 // thực hiện tạo connect tới mqtt broker
